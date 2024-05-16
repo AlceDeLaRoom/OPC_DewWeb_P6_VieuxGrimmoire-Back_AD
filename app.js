@@ -3,7 +3,8 @@ const mongoose = require("mongoose")
 const accessMongoDB = require("./accessMongoDB")
 const path = require('path');
 
-//const stuffRoutes = require('./routes/stuff')
+const userRoutes = require('./routes/user')
+const bookRoutes = require('./routes/book')
 
 async function main() {
     await mongoose.connect(accessMongoDB);
@@ -25,8 +26,8 @@ app.use((req, res, next) => {
     }
 )
 
-
-//app.use("/api/auth", userRoutes)
+app.use("/api/books", bookRoutes)
+app.use("/api/auth", userRoutes)
 //app.use("/images", express.static(path.join(__dirname, 'images')))
 
 module.exports = app

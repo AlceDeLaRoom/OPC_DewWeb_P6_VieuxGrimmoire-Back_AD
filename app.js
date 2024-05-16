@@ -1,11 +1,12 @@
 const express = require("express")
 const mongoose = require("mongoose")
+const accessMongoDB = require("./accessMongoDB")
 const path = require('path');
 
 //const stuffRoutes = require('./routes/stuff')
 
 async function main() {
-    await mongoose.connect('mongodb+srv://user1:QZEelzqiejli@cluster0.jzsellu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
+    await mongoose.connect(accessMongoDB);
 }
 
 main()

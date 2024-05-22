@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const accessMongoDB = require("./accessMongoDB")
 const path = require('path');
 
+
 const userRoutes = require('./routes/user')
 const bookRoutes = require('./routes/book')
 
@@ -28,5 +29,21 @@ app.use((req, res, next) => {
 
 app.use("/api/books", bookRoutes)
 app.use("/api/auth", userRoutes)
+app.use("/images", express.static(path.join(__dirname, 'images')))
 
 module.exports = app
+
+
+// Packge dotenv .env .env.prod .env.dev 
+// ${process.env.MAVARIABLE}
+
+/*
+mongoose.connect(`mongodb+srv://user1:JPUUZfIPqHurbAFC@cluster0.jzsellu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`)
+.then(() => console.log('Connexion à MongoDB réussie !'))
+.catch(err => console.log(err));
+*/
+
+// Password validator https://www.npmjs.com/package/password-validator
+
+// SHARP 
+

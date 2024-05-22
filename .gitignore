@@ -1,2 +1,4 @@
 node_modules
 accessMongoDB.js
+images
+.env

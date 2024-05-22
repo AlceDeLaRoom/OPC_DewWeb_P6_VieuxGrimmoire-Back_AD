@@ -2,16 +2,14 @@ const express = require("express")
 const mongoose = require("mongoose")
 const accessMongoDB = require("./accessMongoDB")
 const path = require('path');
+require('dotenv').config();
+console.log(process.env);
 
 
 const userRoutes = require('./routes/user')
 const bookRoutes = require('./routes/book')
 
-async function main() {
-    await mongoose.connect(accessMongoDB);
-}
-
-main()
+mongoose.connect(accessMongoDB)
     .then(() => console.log('Connexion à MongoDB réussie !'))
     .catch(err => console.log(err));
 
@@ -38,7 +36,7 @@ module.exports = app
 // ${process.env.MAVARIABLE}
 
 /*
-mongoose.connect(`mongodb+srv://user1:JPUUZfIPqHurbAFC@cluster0.jzsellu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`)
+mongoose.connect(`accessMongoDB`)
 .then(() => console.log('Connexion à MongoDB réussie !'))
 .catch(err => console.log(err));
 */

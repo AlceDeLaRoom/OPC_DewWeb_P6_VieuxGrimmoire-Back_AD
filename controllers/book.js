@@ -13,11 +13,11 @@ exports.getOneBook = (req, res, next) => {
         .catch(error => res.status(404).json({ error }))
 }
 
-exports.getBestRating = (req, res, next) => {
+exports.getBestRating = (req, res, next) => { 
     Book.find()
         .sort({averageRating : -1})
         .limit(3)
-        .then((books) => res.status(200).json(books))
+        .then(books => res.status(200).json(books))
         .catch(error => res.status(400).json({ error }))       
 }
 
@@ -27,6 +27,8 @@ exports.addBook = (req, res, next) => {
     delete bookObject._userId
     const book = new Book({
         ...bookObject,
+        ratings: [],
+        averageRating: 0,
         userId: req.auth.userId,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
     })
@@ -35,7 +37,7 @@ exports.addBook = (req, res, next) => {
         .then(() => res.status(201).json({ message: 'Livre enregistré!'}))
         .catch(error => res.status(400).json({ error }))
 }
-
+// possible de delete l'ancienne image?
 exports.modifyBook = (req, res, next) => {
     const bookObject = req.file ? {
         ...JSON.parse(req.body.book),
@@ -43,34 +45,55 @@ exports.modifyBook = (req, res, next) => {
     }:{...req.body}
     delete bookObject._userId
     Book.findOne({_id: req.params.id})
-    .then(book => {
-        if(book.userId != req.auth.userId){
-            res.status(403).json({ message : 'Not authorized!' })
-        }else{
-            Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
-                .then(() => res.status(200).json({ message: 'Livre modifié!'}))
-                .catch(error => res.status(401).json({ error }))
-        }
-    })
-    .catch(error => res.status(400).json({ error }))
+        .then(book => {
+            if(book.userId != req.auth.userId){
+                res.status(403).json({ message : 'Not authorized!' })
+            }else{
+                Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
+                    .then(() => res.status(200).json({ message: 'Livre modifié!'}))
+                    .catch(error => res.status(401).json({ error }))
+            }
+        })
+        .catch(error => res.status(400).json({ error }))
 }
 
 exports.deleteBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
         .then( book => {
             if (book.userId != req.auth.userId){
-                res.status(403).json({ message:'Not authorized!' }) 
+                res.status(403).json({ message:'Not authorized!' })  
             } else {
-                const filename = thing.imageUrl.split('/images/')[1]
+                const filename = book.imageUrl.split('/images/')[1]
                 fs.unlink(`images/${filename}`, ()=>{
                     Book.deleteOne({ _id: req.params.id })
                         .then(() => res.status(200).json({ message: 'Livre supprimé!'}))
                         .catch(error => res.status(401).json({ error }))
-                })
+                    }
+                )
             }
         })
         .catch(error => res.status(500).json({ error }))
 }
 
 exports.addGrade = (req, res, next) => {
+    const ratingObject = req.body
+    if (ratingObject.rating < 0 || ratingObject.rating > 5)[
+        res.status(401).json({ message: 'Note hors limite!' })
+    ]
+    Book.findOne({_id: req.params.id})
+        .then(book => {
+            if(ratingObject.userId != req.auth.userId){
+                res.status(403).json({ message : 'Not authorized!' })
+            } else if (book.ratings.find((elt) => elt.userId === req.auth.userId)) {
+                res.status(401).json({ message:'Livre déja noté!' })
+            }else{
+                book.ratings.push({userId: ratingObject.userId, grade: ratingObject.rating})
+                book.averageRating = book.ratings.reduce((a, b) => a + b.grade, 0) / book.ratings.length
+                console.log("après", book)
+                Book.updateOne({ _id: req.params.id }, { ratings: book.ratings, averageRating: book.averageRating , _id: req.params.id })
+                    .then(() => res.status(200).json(book))
+                    .catch(error => res.status(401).json({ error }))
+            }
+        })
+        .catch(error => res.status(400).json({ error }))
 }

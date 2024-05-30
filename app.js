@@ -1,9 +1,8 @@
 const express = require("express")
 const mongoose = require("mongoose")
-const accessMongoDB = require("./accessMongoDB")
-const path = require('path');
-require('dotenv').config();
-console.log(process.env);
+const path = require('path')
+require('dotenv').config()
+const accessMongoDB = process.env.MONGODBACCESS
 
 
 const userRoutes = require('./routes/user')

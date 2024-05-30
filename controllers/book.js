@@ -1,6 +1,7 @@
 const Book = require('../models/Book')
 const fs = require('fs')
 
+
 exports.getAllBooks = (req, res, next) => {
     Book.find()
         .then(books => res.status(200).json(books))
@@ -32,14 +33,20 @@ exports.addBook = (req, res, next) => {
         userId: req.auth.userId,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
     })
-    console.log(book)
     book.save()
         .then(() => res.status(201).json({ message: 'Livre enregistré!'}))
         .catch(error => res.status(400).json({ error }))
 }
-// possible de delete l'ancienne image?
+
+function updateBook (req, res, bookObject){
+    Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
+        .then(() => res.status(200).json({ message: 'Livre modifié!'}))
+        .catch(error => res.status(401).json({ error }))
+}
+
 exports.modifyBook = (req, res, next) => {
-    const bookObject = req.file ? {
+    const filePresent = req.file ? true : false
+    const bookObject = filePresent ? {
         ...JSON.parse(req.body.book),
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     }:{...req.body}
@@ -49,13 +56,18 @@ exports.modifyBook = (req, res, next) => {
             if(book.userId != req.auth.userId){
                 res.status(403).json({ message : 'Not authorized!' })
             }else{
-                Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
-                    .then(() => res.status(200).json({ message: 'Livre modifié!'}))
-                    .catch(error => res.status(401).json({ error }))
+                if (filePresent){
+                    const filename = book.imageUrl.split('/images/')[1]
+                    fs.unlink(`images/${filename}`, () => updateBook(req, res, bookObject))
+                } else {
+                    updateBook(req, res, bookObject)
+                }
             }
         })
         .catch(error => res.status(400).json({ error }))
 }
+
+
 
 exports.deleteBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
@@ -89,7 +101,6 @@ exports.addGrade = (req, res, next) => {
             }else{
                 book.ratings.push({userId: ratingObject.userId, grade: ratingObject.rating})
                 book.averageRating = book.ratings.reduce((a, b) => a + b.grade, 0) / book.ratings.length
-                console.log("après", book)
                 Book.updateOne({ _id: req.params.id }, { ratings: book.ratings, averageRating: book.averageRating , _id: req.params.id })
                     .then(() => res.status(200).json(book))
                     .catch(error => res.status(401).json({ error }))

@@ -14,6 +14,7 @@ module.exports = (req, res, next) => {
         sharp.cache(false)
         sharp(path)
             .resize(410)
+            .rotate(90)
             .webp({ quality: 20 })
             .toFile("./images/" + ref)
             .then(() =>{ 

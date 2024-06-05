@@ -32,15 +32,9 @@ module.exports = app
 
 
 // Packge dotenv .env .env.prod .env.dev 
-// ${process.env.MAVARIABLE}
+// MONGODBACCESS='mongodb+srv://XXXXXXXXXXXXX@cluster0.jzsellu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 
-/*
-mongoose.connect(`accessMongoDB`)
-.then(() => console.log('Connexion à MongoDB réussie !'))
-.catch(err => console.log(err));
-*/
 
 // Password validator https://www.npmjs.com/package/password-validator
 
-// SHARP 
 
